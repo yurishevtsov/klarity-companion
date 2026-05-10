@@ -6,6 +6,7 @@ import { loadCallsWithNotes, type CallWithNote } from "@/lib/sentinel";
 import { RiskBadge } from "@/components/risk-badge";
 import { cn } from "@/lib/utils";
 import SentinelTrigger from "./SentinelTrigger";
+import PreVisitBrief from "./PreVisitBrief";
 
 export const dynamic = "force-dynamic";
 
@@ -168,7 +169,11 @@ export default async function PatientPage({ params }: PatientPageProps) {
         </div>
       )}
 
-      <section className="mt-8 grid gap-4 lg:grid-cols-3">
+      <div className="mt-6">
+        <PreVisitBrief patientId={patient.id} />
+      </div>
+
+      <section className="mt-6 grid gap-4 lg:grid-cols-3">
         {/* Coach chat */}
         <div className="bg-card text-card-foreground rounded-2xl border p-5 lg:col-span-2">
           <header className="flex items-baseline justify-between">
