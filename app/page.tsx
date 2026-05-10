@@ -1,26 +1,45 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { KlarityMark } from "@/components/klarity-mark";
 import DemoResetButton from "./DemoResetButton";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-16">
-      <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase">
-        Klarity Companion
-      </p>
-      <h1 className="mt-3 text-4xl font-semibold tracking-tight text-balance">
-        The 23 hours and 50 minutes between visits.
+    <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-16">
+      {/* Subtle brand glow behind hero */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-72 w-[42rem] -translate-x-1/2 rounded-full opacity-20 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(closest-side, var(--brand-cyan), transparent 70%)",
+        }}
+      />
+
+      <KlarityMark />
+
+      <h1 className="mt-5 text-5xl font-semibold tracking-tight text-balance leading-[1.05]">
+        The <span style={{ color: "var(--brand-blue)" }}>23 hours and 50 minutes</span> between visits.
       </h1>
-      <p className="mt-4 max-w-xl text-base text-muted-foreground">
+      <p className="mt-5 max-w-xl text-base text-muted-foreground">
         AI care layer for psych and ADHD telehealth practices. Coach for
         patients, Sentinel voice check-ins, and a unified clinician dashboard.
       </p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <div className="bg-card text-card-foreground rounded-2xl border p-6">
-          <h2 className="text-lg font-semibold">Patient surfaces</h2>
+        <div className="group bg-card text-card-foreground rounded-2xl border p-6 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex items-center gap-2">
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: "var(--brand-blue)" }}
+            />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Patient surface
+            </p>
+          </div>
+          <h2 className="mt-2 text-lg font-semibold">Coach &amp; Sentinel</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Inbound text coach + outbound Sentinel voice agent.
+            Inbound text coach + outbound voice check-ins.
           </p>
           <Link
             href="/coach/sarah"
@@ -30,10 +49,19 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="bg-card text-card-foreground rounded-2xl border p-6">
-          <h2 className="text-lg font-semibold">Clinician view</h2>
+        <div className="group bg-card text-card-foreground rounded-2xl border p-6 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex items-center gap-2">
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: "var(--brand-cyan)" }}
+            />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Clinician view
+            </p>
+          </div>
+          <h2 className="mt-2 text-lg font-semibold">Patient roster</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Patient roster with risk badges and longitudinal context.
+            Risk badges, longitudinal context, pre-visit brief.
           </p>
           <Link
             href="/clinician"

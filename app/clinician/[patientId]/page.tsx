@@ -4,6 +4,7 @@ import { getPatient, type Patient } from "@/lib/patients";
 import { loadHistory, getPatientRiskSummary, isFlagged } from "@/lib/chat";
 import { loadCallsWithNotes, type CallWithNote } from "@/lib/sentinel";
 import { RiskBadge } from "@/components/risk-badge";
+import { KlarityMark } from "@/components/klarity-mark";
 import { cn } from "@/lib/utils";
 import SentinelTrigger from "./SentinelTrigger";
 import PreVisitBrief from "./PreVisitBrief";
@@ -131,11 +132,17 @@ export default async function PatientPage({ params }: PatientPageProps) {
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
-      <Link href="/clinician" className="text-xs text-muted-foreground hover:text-foreground">
-        ← Patients
-      </Link>
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <Link href="/" className="inline-flex items-center transition-colors hover:text-foreground">
+          <KlarityMark showWordmark={false} />
+        </Link>
+        <span aria-hidden className="text-border">/</span>
+        <Link href="/clinician" className="transition-colors hover:text-foreground">
+          Patients
+        </Link>
+      </div>
 
-      <header className="mt-3 flex flex-wrap items-end justify-between gap-3">
+      <header className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
             Patient
@@ -175,7 +182,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
 
       <section className="mt-6 grid gap-4 lg:grid-cols-3">
         {/* Coach chat */}
-        <div className="bg-card text-card-foreground rounded-2xl border p-5 lg:col-span-2">
+        <div className="bg-card text-card-foreground rounded-2xl border p-5 shadow-sm lg:col-span-2">
           <header className="flex items-baseline justify-between">
             <h2 className="text-sm font-medium">Recent Coach chat</h2>
             <span className="text-[11px] text-muted-foreground">
@@ -223,7 +230,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
 
         {/* Right column — at-a-glance + Sentinel placeholder */}
         <div className="space-y-4">
-          <div className="bg-card text-card-foreground rounded-2xl border p-5">
+          <div className="bg-card text-card-foreground rounded-2xl border p-5 shadow-sm">
             <h2 className="text-sm font-medium">At a glance</h2>
             <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs">
               <dt className="text-muted-foreground">Last touch</dt>
@@ -245,7 +252,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
             </div>
           </div>
 
-          <div className="bg-card text-card-foreground rounded-2xl border p-5">
+          <div className="bg-card text-card-foreground rounded-2xl border p-5 shadow-sm">
             <header className="flex items-baseline justify-between mb-3">
               <h2 className="text-sm font-medium">Sentinel calls</h2>
               <span className="text-[11px] text-muted-foreground">{calls.length}</span>
