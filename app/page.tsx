@@ -1,6 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { KlarityMark } from "@/components/klarity-mark";
 import DemoResetButton from "./DemoResetButton";
 
 export default function Home() {
@@ -16,9 +16,21 @@ export default function Home() {
         }}
       />
 
-      <KlarityMark />
+      <div className="flex items-baseline gap-2">
+        <Image
+          src="/klarity-brand.svg"
+          alt="Klarity"
+          width={104}
+          height={34}
+          priority
+          unoptimized
+        />
+        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground translate-y-[-2px]">
+          Companion
+        </span>
+      </div>
 
-      <h1 className="mt-5 text-5xl font-semibold tracking-tight text-balance leading-[1.05]">
+      <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance leading-[1.05]">
         Continuous care, <span style={{ color: "var(--brand-blue)" }}>between visits.</span>
       </h1>
       <p className="mt-5 max-w-xl text-base text-muted-foreground">
@@ -46,7 +58,7 @@ export default function Home() {
             href="/coach/jane"
             className={buttonVariants({ size: "lg", className: "mt-5 w-full" })}
           >
-            Open Coach (demo)
+            Open Coach
           </Link>
         </div>
 
@@ -66,7 +78,7 @@ export default function Home() {
           </p>
           <Link
             href="/clinician"
-            className={buttonVariants({ variant: "outline", size: "lg", className: "mt-5 w-full" })}
+            className={buttonVariants({ size: "lg", className: "mt-5 w-full" })}
           >
             Open Dashboard
           </Link>

@@ -65,7 +65,7 @@ export async function POST() {
         patient_id: ids.jane,
         role: "assistant",
         content:
-          "Lower the bar to laughable. Pick the shortest email and type the messiest reply you can — typos, fragments, no rules. 90 seconds max. Hit send. Once one is gone the rest unstick themselves. Want me to set a 5-min timer when you start?",
+          "Lower the bar to laughable. Three rules:\n\n- Pick the **shortest** email — easiest sender wins.\n- Type the messiest reply you can. Typos welcome.\n- *90 seconds max.* Hit send.\n\nOnce one is gone the rest unstick themselves. Want me to set a 5-min timer when you start?",
         created_at: isoMinutesAgo(11),
       },
     ];

@@ -5,9 +5,11 @@ import { loadHistory, getPatientRiskSummary, isFlagged } from "@/lib/chat";
 import { loadCallsWithNotes, type CallWithNote } from "@/lib/sentinel";
 import { RiskBadge } from "@/components/risk-badge";
 import { KlarityMark } from "@/components/klarity-mark";
+import { Prose } from "@/components/prose";
 import { cn } from "@/lib/utils";
 import SentinelTrigger from "./SentinelTrigger";
 import PreVisitBrief from "./PreVisitBrief";
+import CallDeleteButton from "./CallDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -38,14 +40,17 @@ function CallCard({ call }: { call: CallWithNote }) {
   }[call.status];
 
   return (
-    <li className="rounded-xl border p-3 text-xs">
+    <li className="group rounded-xl border p-3 text-xs">
       <div className="flex items-baseline justify-between gap-2">
         <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase", statusStyle)}>
           {call.status.replace("_", " ")}
         </span>
-        <span className="text-[10px] text-muted-foreground">
-          {formatRelative(call.created_at)}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground">
+            {formatRelative(call.created_at)}
+          </span>
+          <CallDeleteButton callId={call.id} />
+        </div>
       </div>
 
       {call.duration_sec !== null && (
@@ -82,11 +87,11 @@ function CallCard({ call }: { call: CallWithNote }) {
 function SoapField({ label, text }: { label: string; text: string }) {
   if (!text) return null;
   return (
-    <div className="text-[11px] leading-relaxed">
-      <span className="mr-1.5 inline-flex h-4 w-4 items-center justify-center rounded bg-muted text-[9px] font-bold tabular-nums">
+    <div className="flex gap-1.5 text-[11px] leading-relaxed">
+      <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded bg-muted text-[9px] font-bold tabular-nums">
         {label}
       </span>
-      <span>{text}</span>
+      <Prose className="flex-1">{text}</Prose>
     </div>
   );
 }
@@ -215,7 +220,13 @@ export default async function PatientPage({ params }: PatientPageProps) {
                         {formatRelative(m.created_at)}
                       </span>
                     </div>
-                    <p className="mt-1 whitespace-pre-wrap text-foreground">{m.content}</p>
+                    <div className="mt-1 text-foreground">
+                      {m.role === "assistant" ? (
+                        <Prose>{m.content}</Prose>
+                      ) : (
+                        <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{m.content}</p>
+                      )}
+                    </div>
                     {userFlags.length > 0 && (
                       <p className="mt-2 text-[10px] uppercase tracking-wide text-red-600 dark:text-red-400">
                         flags: {userFlags.join(", ").replace(/_/g, " ")}
