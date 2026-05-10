@@ -21,14 +21,39 @@ type State =
 export default function SentinelTrigger({ patientId }: Props) {
   const [state, setState] = useState<State>({ kind: "idle" });
   const clientRef = useRef<RetellWebClient | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
-  // Cleanup: hang up on unmount
+  // Cleanup: hang up + stop polling on unmount
   useEffect(() => {
     return () => {
       clientRef.current?.stopCall();
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
     };
   }, []);
+
+  // After a call ends, poll for ~30s waiting for the SOAP note to arrive.
+  // SOAP gen takes ~6s server-side; polling every 3s lands the update in <10s
+  // without requiring true realtime infrastructure.
+  function startPostCallPolling() {
+    if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
+
+    router.refresh(); // immediate refresh so the 'in_progress' row flips to 'completed'
+
+    pollIntervalRef.current = setInterval(() => {
+      router.refresh();
+    }, 3000);
+
+    pollTimeoutRef.current = setTimeout(() => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    }, 30_000);
+  }
 
   async function trigger() {
     setState({ kind: "starting" });
@@ -74,7 +99,7 @@ export default function SentinelTrigger({ patientId }: Props) {
       client.on("call_ended", () => {
         setState({ kind: "ended", callId: json.call_id });
         clientRef.current = null;
-        router.refresh();
+        startPostCallPolling();
       });
       client.on("error", (err: unknown) => {
         console.error("[retell-web-client] error", err);
@@ -97,7 +122,7 @@ export default function SentinelTrigger({ patientId }: Props) {
         ? { kind: "ended", callId: "callId" in s ? s.callId : "" }
         : { kind: "idle" }
     );
-    router.refresh();
+    startPostCallPolling();
   }
 
   // Render
