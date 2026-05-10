@@ -1,18 +1,47 @@
 import Link from "next/link";
+import { listPatients, type Patient } from "@/lib/patients";
+import { getPatientRiskSummary, type RiskSummary } from "@/lib/chat";
+import { RiskBadge } from "@/components/risk-badge";
 
-const SEED_PATIENTS = [
-  { id: "sarah", name: "Sarah Chen", age: 28, summary: "ADHD · Adderall XR 20mg · day 14" },
-  { id: "marcus", name: "Marcus Reed", age: 34, summary: "ADHD + GAD · Vyvanse 30mg + Lexapro 10mg" },
-  { id: "jordan", name: "Jordan Patel", age: 22, summary: "MDD · Wellbutrin 150mg · day 7" },
-];
+// Always render fresh — chat history changes between visits.
+export const dynamic = "force-dynamic";
 
-export default function ClinicianPage() {
+function formatTouchpoint(iso: string | null): string {
+  if (!iso) return "no recent activity";
+  const diffMin = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `${diffH}h ago`;
+  const diffD = Math.floor(diffH / 24);
+  return `${diffD}d ago`;
+}
+
+function summarizeMeds(meds: Patient["current_meds"]): string {
+  if (meds.length === 0) return "no meds on file";
+  return meds.map((m) => `${m.name}${m.dose ? ` ${m.dose}` : ""}`).join(" + ");
+}
+
+const SORT_PRIORITY: Record<RiskSummary["level"], number> = { high: 0, medium: 1, low: 2 };
+
+export default async function ClinicianPage() {
+  const patients = await listPatients();
+  const enriched = await Promise.all(
+    patients.map(async (p) => ({ patient: p, summary: await getPatientRiskSummary(p.id) }))
+  );
+
+  // High risk first, then medium, then low; within a tier, most-recent activity first.
+  enriched.sort((a, b) => {
+    const tier = SORT_PRIORITY[a.summary.level] - SORT_PRIORITY[b.summary.level];
+    if (tier !== 0) return tier;
+    const aT = a.summary.lastTouchpoint ?? "";
+    const bT = b.summary.lastTouchpoint ?? "";
+    return bT.localeCompare(aT);
+  });
+
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
-      <Link
-        href="/"
-        className="text-xs text-muted-foreground hover:text-foreground"
-      >
+      <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">
         ← Klarity Companion
       </Link>
 
@@ -23,28 +52,43 @@ export default function ClinicianPage() {
           </p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">Patients</h1>
         </div>
-        <p className="text-xs text-muted-foreground">{SEED_PATIENTS.length} active</p>
+        <p className="text-xs text-muted-foreground">{enriched.length} active</p>
       </header>
 
       <ul className="mt-8 grid gap-3">
-        {SEED_PATIENTS.map((p) => (
-          <li key={p.id}>
+        {enriched.map(({ patient, summary }) => (
+          <li key={patient.id}>
             <Link
-              href={`/clinician/${p.id}`}
+              href={`/clinician/${patient.slug ?? patient.id}`}
               className="bg-card text-card-foreground flex items-center justify-between rounded-2xl border p-5 transition-colors hover:bg-accent"
             >
-              <div>
-                <p className="font-medium">{p.name}, {p.age}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">{p.summary}</p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">{patient.name}</p>
+                  <RiskBadge level={summary.level} />
+                </div>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  {patient.conditions.join(" · ") || "no conditions"} · {summarizeMeds(patient.current_meds)}
+                </p>
+                {summary.recentRiskFlags.length > 0 && (
+                  <p className="mt-1 text-[11px] text-red-600 dark:text-red-400">
+                    flags: {summary.recentRiskFlags.join(", ").replace(/_/g, " ")}
+                  </p>
+                )}
               </div>
-              <span className="text-xs text-muted-foreground">View →</span>
+              <div className="ml-4 shrink-0 text-right">
+                <p className="text-xs text-muted-foreground">{formatTouchpoint(summary.lastTouchpoint)}</p>
+                {summary.totalMessages > 0 && (
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">{summary.totalMessages} msg/wk</p>
+                )}
+              </div>
             </Link>
           </li>
         ))}
       </ul>
 
       <p className="mt-12 text-xs text-muted-foreground">
-        Live patient list ships in Phase 3 (InsForge realtime).
+        Sorted by risk, then most recent activity. Live realtime ships in a follow-up.
       </p>
     </main>
   );
