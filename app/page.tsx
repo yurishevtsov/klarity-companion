@@ -85,9 +85,12 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mt-12 flex items-center justify-between gap-4">
+      <div className="mt-12 flex flex-wrap items-center justify-between gap-4">
         <p className="text-xs text-muted-foreground">
-          Demo data only. Not a substitute for medical advice. If in crisis, call or text 988.
+          Proof-of-concept demo. Not a substitute for medical advice. In crisis, call or text 988.{" "}
+          <Link href="/about" className="underline underline-offset-2 transition-colors hover:text-foreground">
+            About this project →
+          </Link>
         </p>
         <DemoResetButton />
       </div>
