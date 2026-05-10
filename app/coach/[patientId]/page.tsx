@@ -38,7 +38,7 @@ export default async function CoachPage({ params, searchParams }: CoachPageProps
   const initialMessages = rowsToUIMessages(history);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-8">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">
       <Link
         href="/"
         className="inline-flex items-center gap-2 text-xs text-muted-foreground transition-colors hover:text-foreground"

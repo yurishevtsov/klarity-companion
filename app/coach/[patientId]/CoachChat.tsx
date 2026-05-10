@@ -236,13 +236,13 @@ export default function CoachChat({
           </div>
         </aside>
 
-        <div className="flex flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile-only session selector — sidebar isn't visible below md */}
-          <div className="mb-3 flex items-center gap-2 md:hidden">
+          <div className="mb-3 flex w-full items-center gap-2 md:hidden">
             <select
               value={currentSessionId}
               onChange={(e) => switchSession(e.target.value)}
-              className="min-w-0 flex-1 truncate rounded-xl border bg-card px-3 py-2 text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="min-w-0 flex-1 rounded-xl border bg-card px-3 py-2 text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
               aria-label="Switch chat session"
             >
               {sessions.length === 0 && (
@@ -251,8 +251,8 @@ export default function CoachChat({
               {sessions.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.all_private ? "🔒 " : ""}
-                  {(s.preview || "(empty)").slice(0, 50)}
-                  {(s.preview || "").length > 50 ? "…" : ""}
+                  {(s.preview || "(empty)").slice(0, 32)}
+                  {(s.preview || "").length > 32 ? "…" : ""}
                   {" · "}
                   {formatRelative(s.last_at)}
                 </option>
