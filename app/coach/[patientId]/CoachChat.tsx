@@ -1,41 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo, type FormEvent, type ReactNode } from "react";
+import { useState, useRef, useEffect, useMemo, type FormEvent } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
+import { Prose } from "@/components/prose";
 import { cn } from "@/lib/utils";
 import FocusOverlay, { type FocusState } from "./FocusOverlay";
-
-const ASSISTANT_MD_COMPONENTS = {
-  p: ({ children }: { children?: ReactNode }) => (
-    <p className="mb-2 last:mb-0">{children}</p>
-  ),
-  ul: ({ children }: { children?: ReactNode }) => (
-    <ul className="my-1 list-disc space-y-0.5 pl-5">{children}</ul>
-  ),
-  ol: ({ children }: { children?: ReactNode }) => (
-    <ol className="my-1 list-decimal space-y-0.5 pl-5">{children}</ol>
-  ),
-  li: ({ children }: { children?: ReactNode }) => (
-    <li className="leading-relaxed">{children}</li>
-  ),
-  strong: ({ children }: { children?: ReactNode }) => (
-    <strong className="font-semibold">{children}</strong>
-  ),
-  em: ({ children }: { children?: ReactNode }) => <em className="italic">{children}</em>,
-  code: ({ children }: { children?: ReactNode }) => (
-    <code className="rounded bg-foreground/10 px-1 py-0.5 font-mono text-[0.85em]">
-      {children}
-    </code>
-  ),
-  a: ({ children, href }: { children?: ReactNode; href?: string }) => (
-    <a href={href} target="_blank" rel="noreferrer" className="underline underline-offset-2">
-      {children}
-    </a>
-  ),
-};
 
 type Props = {
   patientId: string;
@@ -179,7 +150,7 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
                 ) : isUser ? (
                   text
                 ) : (
-                  <ReactMarkdown components={ASSISTANT_MD_COMPONENTS}>{text}</ReactMarkdown>
+                  <Prose>{text}</Prose>
                 )}
               </div>
             </div>
