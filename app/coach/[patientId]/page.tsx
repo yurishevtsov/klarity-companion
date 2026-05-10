@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getPatient } from "@/lib/patients";
+import { loadHistory, rowsToUIMessages } from "@/lib/chat";
+import CoachChat from "./CoachChat";
 
 type CoachPageProps = {
   params: Promise<{ patientId: string }>;
@@ -6,30 +10,30 @@ type CoachPageProps = {
 
 export default async function CoachPage({ params }: CoachPageProps) {
   const { patientId } = await params;
+  const patient = await getPatient(patientId);
+  if (!patient) notFound();
+
+  const history = await loadHistory(patient.id);
+  const initialMessages = rowsToUIMessages(history);
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
-      <Link
-        href="/"
-        className="text-xs text-muted-foreground hover:text-foreground"
-      >
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-8">
+      <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">
         ← Klarity Companion
       </Link>
 
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">
-        Coach
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Patient: <code className="font-mono">{patientId}</code>
-      </p>
-
-      <div className="bg-card text-card-foreground mt-8 rounded-2xl border p-6">
-        <p className="text-sm text-muted-foreground">
-          Chat interface ships in Phase 1. The patient will type here and the
-          coach will reply with CBT-style nudges, task breakdowns, and risk
-          escalation when warranted.
+      <header className="mt-3 mb-4">
+        <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
+          Coach
         </p>
-      </div>
+        <h1 className="mt-1 text-xl font-semibold tracking-tight">{patient.name}</h1>
+      </header>
+
+      <CoachChat
+        patientId={patient.id}
+        patientName={patient.name}
+        initialMessages={initialMessages}
+      />
     </main>
   );
 }
