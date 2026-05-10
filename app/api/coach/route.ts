@@ -1,5 +1,5 @@
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { coachModel, buildCoachSystemPrompt } from "@/lib/ai";
+import { coachModel, buildCoachSystemPrompt, focusModeAddendum } from "@/lib/ai";
 import { getPatient } from "@/lib/patients";
 import { insforgeServer } from "@/lib/insforge";
 import { classifyRisk } from "@/lib/risk-classifier";
@@ -9,6 +9,8 @@ export const runtime = "nodejs";
 type CoachRequestBody = {
   messages: UIMessage[];
   patientId: string;
+  focus_mode?: boolean;
+  focus_task?: string | null;
 };
 
 function extractText(message: UIMessage): string {
@@ -20,7 +22,7 @@ function extractText(message: UIMessage): string {
 
 export async function POST(req: Request) {
   const body = (await req.json()) as CoachRequestBody;
-  const { messages, patientId } = body;
+  const { messages, patientId, focus_mode, focus_task } = body;
 
   if (!patientId || !Array.isArray(messages)) {
     return new Response("Bad request", { status: 400 });
@@ -47,11 +49,15 @@ export async function POST(req: Request) {
     userMessageId = (data as { id: string } | null)?.id ?? null;
   }
 
+  const systemPrompt = focus_mode
+    ? buildCoachSystemPrompt(patient) + focusModeAddendum(focus_task ?? null)
+    : buildCoachSystemPrompt(patient);
+
   const result = streamText({
     model: coachModel,
-    system: buildCoachSystemPrompt(patient),
+    system: systemPrompt,
     messages: await convertToModelMessages(messages),
-    maxOutputTokens: 400,
+    maxOutputTokens: focus_mode ? 80 : 400,
     onFinish: async ({ text }) => {
       if (!text) return;
 
