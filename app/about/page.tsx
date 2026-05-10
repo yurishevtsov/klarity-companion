@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export const metadata = {
   title: "About — Klarity Companion",
   description:
-    "Proof-of-concept AI care layer for the time between psychiatric visits. Built for the Klarity hackathon.",
+    "Proof-of-concept AI care layer for the time between psychiatric visits. Built for Build Smth AI-Native @ Cal.",
 };
 
 function Section({
@@ -96,7 +96,7 @@ export default function AboutPage() {
           <span style={{ color: "var(--brand-blue)" }}>between visits</span>.
         </h1>
         <p className="mt-3 text-base text-muted-foreground">
-          Built in May 2026 for the Klarity x Retell x Zeabur x InsForge hackathon.
+          Built in May 2026 at <strong>Build Smth AI-Native @ Cal</strong> on the Klarity track, with Retell, Zeabur, and InsForge as backend sponsors.
           The 50-minute appointment is when treatment decisions get made. Everything
           between visits is when patients quietly disengage, side effects go
           unreported, and providers fly blind. This is three coordinated surfaces
@@ -223,7 +223,7 @@ export default function AboutPage() {
 
       <footer className="mt-16 border-t pt-6 text-xs text-muted-foreground">
         <p>
-          Built by Yuri Shevtsov (with generous assistance from Claude Code) — Klarity Hackathon, May 2026.{" "}
+          Built by Yuri Shevtsov (with generous assistance from Claude Code) — Build Smth AI-Native @ Cal, Klarity track, May 2026.{" "}
           <a
             href="https://github.com/yurishevtsov/klarity-companion"
             target="_blank"

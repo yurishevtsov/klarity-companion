@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPatient, type Patient } from "@/lib/patients";
-import { loadHistory, getPatientRiskSummary, isFlagged } from "@/lib/chat";
+import { loadHistory, loadSessions, getPatientRiskSummary } from "@/lib/chat";
 import { loadCallsWithNotes, type CallWithNote } from "@/lib/sentinel";
 import { RiskBadge } from "@/components/risk-badge";
 import { KlarityMark } from "@/components/klarity-mark";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import SentinelTrigger from "./SentinelTrigger";
 import PreVisitBrief from "./PreVisitBrief";
 import CallDeleteButton from "./CallDeleteButton";
+import ChatSessionTiles from "./ChatSessionTiles";
 
 export const dynamic = "force-dynamic";
 
@@ -125,14 +126,13 @@ export default async function PatientPage({ params }: PatientPageProps) {
   const patient = await getPatient(patientId);
   if (!patient) notFound();
 
-  const [history, summary, calls] = await Promise.all([
-    loadHistory(patient.id, 30, { excludePrivate: true }),
+  const [history, sessions, summary, calls] = await Promise.all([
+    loadHistory(patient.id, 200, { excludePrivate: true }),
+    loadSessions(patient.id),
     getPatientRiskSummary(patient.id),
     loadCallsWithNotes(patient.id, 5),
   ]);
 
-  // Show last 8 in chronological order (oldest → newest, newest at the bottom).
-  const recent = history.slice(-8);
   const lastTouchpoint = summary.lastTouchpoint ? formatRelative(summary.lastTouchpoint) : "no activity";
   const flaggedFlags = summary.recentRiskFlags;
 
@@ -190,54 +190,17 @@ export default async function PatientPage({ params }: PatientPageProps) {
         {/* Coach chat */}
         <div className="bg-card text-card-foreground rounded-2xl border p-5 shadow-sm lg:col-span-2">
           <header className="flex items-baseline justify-between">
-            <h2 className="text-sm font-medium">Recent Coach chat</h2>
+            <h2 className="text-sm font-medium">Coach sessions</h2>
             <span className="text-[11px] text-muted-foreground">
-              last 7d · {summary.totalMessages} msg
+              {sessions.length} session{sessions.length === 1 ? "" : "s"} · {summary.totalMessages} msg/wk
             </span>
           </header>
 
-          {recent.length === 0 ? (
-            <p className="mt-4 text-xs text-muted-foreground">
-              No chat activity yet. Patient hasn&apos;t started a session.
-            </p>
-          ) : (
-            <ul className="mt-4 space-y-2">
-              {recent.map((m) => {
-                const flagged = isFlagged(m.flags);
-                const userFlags = (m.flags ?? []).filter((f) => !f.startsWith("risk:"));
-                return (
-                  <li
-                    key={m.id}
-                    className={cn(
-                      "rounded-xl border p-3 text-xs leading-relaxed",
-                      flagged && "border-red-500/40 bg-red-500/5"
-                    )}
-                  >
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="font-medium uppercase tracking-wide text-[10px] text-muted-foreground">
-                        {m.role}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        {formatRelative(m.created_at)}
-                      </span>
-                    </div>
-                    <div className="mt-1 text-foreground">
-                      {m.role === "assistant" ? (
-                        <Prose>{m.content}</Prose>
-                      ) : (
-                        <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{m.content}</p>
-                      )}
-                    </div>
-                    {userFlags.length > 0 && (
-                      <p className="mt-2 text-[10px] uppercase tracking-wide text-red-600 dark:text-red-400">
-                        flags: {userFlags.join(", ").replace(/_/g, " ")}
-                      </p>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <ChatSessionTiles
+            patientId={patient.id}
+            sessions={sessions}
+            messages={history}
+          />
         </div>
 
         {/* Right column — at-a-glance + Sentinel placeholder */}
