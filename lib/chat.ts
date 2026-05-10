@@ -9,12 +9,32 @@ export type ChatRow = {
   created_at: string;
 };
 
-export async function loadHistory(patientId: string, limit = 50): Promise<ChatRow[]> {
-  const { data, error } = await insforgeServer
+type LoadHistoryOptions = {
+  /**
+   * If true, exclude messages the patient marked private. Use this for any
+   * provider-facing surface (clinician dashboard, pre-visit brief). The
+   * patient's own coach view should pass false so they always see their
+   * full history.
+   */
+  excludePrivate?: boolean;
+};
+
+export async function loadHistory(
+  patientId: string,
+  limit = 50,
+  opts: LoadHistoryOptions = {}
+): Promise<ChatRow[]> {
+  let query = insforgeServer
     .database
     .from("chat_messages")
     .select("id, role, content, flags, created_at")
-    .eq("patient_id", patientId)
+    .eq("patient_id", patientId);
+
+  if (opts.excludePrivate) {
+    query = query.eq("private", false);
+  }
+
+  const { data, error } = await query
     .order("created_at", { ascending: true })
     .limit(limit);
 
@@ -49,11 +69,13 @@ const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 export async function getPatientRiskSummary(patientId: string): Promise<RiskSummary> {
   const since = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
 
+  // Risk summary surfaces in clinician dashboard — exclude private turns.
   const { data, error } = await insforgeServer
     .database
     .from("chat_messages")
     .select("flags, created_at")
     .eq("patient_id", patientId)
+    .eq("private", false)
     .gte("created_at", since)
     .order("created_at", { ascending: false });
 

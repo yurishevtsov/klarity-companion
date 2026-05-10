@@ -26,12 +26,16 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
   const [input, setInput] = useState("");
   const [clearing, setClearing] = useState(false);
   const [focusState, setFocusState] = useState<FocusState | null>(null);
+  const [privateMode, setPrivateMode] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
 
-  // Sync focus state into a ref so the transport body fn reads fresh values.
+  // Sync focus + privacy into refs so the transport body fn reads fresh values.
   const focusRef = useRef<FocusState | null>(null);
   focusRef.current = focusState;
+  const privateRef = useRef(privateMode);
+  privateRef.current = privateMode;
 
   const transport = useMemo(
     () =>
@@ -41,7 +45,12 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
           const fs = focusRef.current;
           const focusMode = fs?.phase === "running";
           const focusTask = fs?.phase === "running" ? fs.task : null;
-          return { patientId, focus_mode: focusMode, focus_task: focusTask };
+          return {
+            patientId,
+            focus_mode: focusMode,
+            focus_task: focusTask,
+            private: privateRef.current,
+          };
         },
       }),
     [patientId]
@@ -93,6 +102,8 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
     }
     sendMessage({ text: trimmed });
     setInput("");
+    // Reset textarea height after submit
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
   }
 
   return (
@@ -117,6 +128,37 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
       />
     )}
     <div className="flex flex-1 flex-col">
+      {/* Privacy disclosure banner — visible above the chat */}
+      <div
+        className={cn(
+          "mb-3 flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-[11px] transition-colors",
+          privateMode
+            ? "border-amber-500/40 bg-amber-500/5 text-amber-800 dark:text-amber-300"
+            : "border-border bg-muted/40 text-muted-foreground"
+        )}
+      >
+        <span className="leading-snug">
+          {privateMode ? (
+            <>🔒 Private mode — these messages are <strong>not shared</strong> with your provider.</>
+          ) : (
+            <>Your provider can see a summary of these chats for clinical assessment.</>
+          )}
+        </span>
+        <button
+          type="button"
+          onClick={() => setPrivateMode((p) => !p)}
+          aria-pressed={privateMode}
+          className={cn(
+            "shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors",
+            privateMode
+              ? "bg-amber-500 text-amber-950 hover:bg-amber-400"
+              : "border border-border text-foreground hover:bg-accent"
+          )}
+        >
+          {privateMode ? "Private · ON" : "Make private"}
+        </button>
+      </div>
+
       <div
         ref={scrollerRef}
         className="flex-1 space-y-3 overflow-y-auto rounded-2xl border bg-card p-5"
@@ -173,19 +215,35 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
         )}
       </div>
 
-      <form onSubmit={onSubmit} className="mt-3 flex gap-2">
-        <input
-          type="text"
+      <form onSubmit={onSubmit} className="mt-3 flex items-end gap-2">
+        <textarea
+          ref={textareaRef}
+          rows={1}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            const el = e.currentTarget;
+            el.style.height = "auto";
+            el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+          }}
+          onKeyDown={(e) => {
+            // Enter submits; Shift+Enter inserts a newline (chat convention).
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (input.trim() && status !== "streaming" && status !== "submitted") {
+                e.currentTarget.form?.requestSubmit();
+              }
+            }
+          }}
           placeholder="Type a message..."
           disabled={status === "streaming" || status === "submitted"}
-          className="flex-1 rounded-xl border bg-background px-4 py-2 text-sm outline-none ring-ring focus:ring-2 disabled:opacity-50"
+          className="flex-1 resize-none rounded-xl border bg-background px-4 py-2 text-sm leading-relaxed outline-none ring-ring [overflow-wrap:anywhere] [word-break:break-word] focus:ring-2 disabled:opacity-50"
+          style={{ maxHeight: "160px", minHeight: "40px" }}
         />
         <button
           type="submit"
           disabled={!input.trim() || status === "streaming" || status === "submitted"}
-          className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-40"
+          className="h-10 shrink-0 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-40"
         >
           Send
         </button>

@@ -38,6 +38,7 @@ export async function generatePreVisitBrief({ patient }: BriefInput): Promise<Br
       .from("chat_messages")
       .select("role, content, flags, created_at")
       .eq("patient_id", patient.id)
+      .eq("private", false) // exclude patient-marked-private turns from provider-facing brief
       .gte("created_at", since)
       .order("created_at", { ascending: true }),
     insforgeServer.database
