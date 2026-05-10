@@ -7,20 +7,26 @@ export const runtime = "nodejs";
 
 type TriggerBody = {
   patientId: string;
+  // 'auto' picks phone if RETELL_FROM_NUMBER is set, else web. Override to force one mode.
+  mode?: "auto" | "phone" | "web";
 };
+
+type TriggerResponse =
+  | { ok: true; mode: "phone"; call_id: string }
+  | { ok: true; mode: "web"; call_id: string; access_token: string }
+  | { ok: false; error: string };
 
 export async function POST(req: Request) {
   const apiKey = process.env.RETELL_API_KEY;
   const agentId = process.env.RETELL_AGENT_ID;
   const fromNumber = process.env.RETELL_FROM_NUMBER;
 
-  if (!apiKey || !agentId || !fromNumber) {
+  if (!apiKey || !agentId) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          "Sentinel not configured: set RETELL_API_KEY, RETELL_AGENT_ID, and RETELL_FROM_NUMBER on the server.",
-      },
+        error: "Sentinel not configured: set RETELL_API_KEY and RETELL_AGENT_ID on the server.",
+      } as TriggerResponse,
       { status: 503 }
     );
   }
@@ -29,59 +35,100 @@ export async function POST(req: Request) {
   try {
     body = (await req.json()) as TriggerBody;
   } catch {
-    return NextResponse.json({ ok: false, error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Invalid JSON" } as TriggerResponse,
+      { status: 400 }
+    );
   }
   if (!body.patientId) {
-    return NextResponse.json({ ok: false, error: "Missing patientId" }, { status: 400 });
-  }
-
-  const patient = await getPatient(body.patientId);
-  if (!patient) {
-    return NextResponse.json({ ok: false, error: "Patient not found" }, { status: 404 });
-  }
-  if (!patient.phone) {
     return NextResponse.json(
-      { ok: false, error: `Patient ${patient.name} has no phone on file.` },
+      { ok: false, error: "Missing patientId" } as TriggerResponse,
       { status: 400 }
     );
   }
 
-  // Retell's outbound phone call: agent is bound to from_number in the Retell dashboard.
-  // Pass override_agent_id only when you want to dispatch a different agent for this call.
-  const retell = new Retell({ apiKey });
-  let call;
-  try {
-    call = await retell.call.createPhoneCall({
-      from_number: fromNumber,
-      to_number: patient.phone,
-      override_agent_id: agentId,
-      metadata: { patient_id: patient.id, slug: patient.slug },
-    });
-  } catch (err) {
-    console.error("[sentinel/trigger] retell error", err);
+  const patient = await getPatient(body.patientId);
+  if (!patient) {
     return NextResponse.json(
-      { ok: false, error: "Retell API call failed", detail: String(err) },
-      { status: 502 }
+      { ok: false, error: "Patient not found" } as TriggerResponse,
+      { status: 404 }
     );
   }
 
-  // Pre-create the calls row so the dashboard can show it as 'in_progress' immediately.
-  // The webhook will upsert this row with transcript + recording when the call ends.
-  const { error: insertErr } = await insforgeServer.database.from("calls").insert([{
-    patient_id: patient.id,
-    retell_call_id: call.call_id,
+  const requested = body.mode ?? "auto";
+  const mode: "phone" | "web" =
+    requested === "phone"
+      ? "phone"
+      : requested === "web"
+        ? "web"
+        : fromNumber
+          ? "phone"
+          : "web";
+
+  if (mode === "phone" && (!fromNumber || !patient.phone)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: !fromNumber
+          ? "Phone mode unavailable: RETELL_FROM_NUMBER not set."
+          : `Patient ${patient.name} has no phone on file.`,
+      } as TriggerResponse,
+      { status: 400 }
+    );
+  }
+
+  const retell = new Retell({ apiKey });
+  const metadata = { patient_id: patient.id, slug: patient.slug ?? "" };
+
+  try {
+    if (mode === "phone") {
+      const call = await retell.call.createPhoneCall({
+        from_number: fromNumber!,
+        to_number: patient.phone!,
+        override_agent_id: agentId,
+        metadata,
+      });
+
+      await preCreateCall(patient.id, call.call_id);
+
+      return NextResponse.json({
+        ok: true,
+        mode: "phone",
+        call_id: call.call_id,
+      } as TriggerResponse);
+    }
+
+    // web mode
+    const call = await retell.call.createWebCall({
+      agent_id: agentId,
+      metadata,
+    });
+
+    await preCreateCall(patient.id, call.call_id);
+
+    return NextResponse.json({
+      ok: true,
+      mode: "web",
+      call_id: call.call_id,
+      access_token: call.access_token,
+    } as TriggerResponse);
+  } catch (err) {
+    console.error("[sentinel/trigger] retell error", err);
+    return NextResponse.json(
+      { ok: false, error: "Retell API call failed", detail: String(err) } as TriggerResponse,
+      { status: 502 }
+    );
+  }
+}
+
+async function preCreateCall(patientId: string, retellCallId: string) {
+  const { error } = await insforgeServer.database.from("calls").insert([{
+    patient_id: patientId,
+    retell_call_id: retellCallId,
     status: "in_progress",
     scheduled_for: new Date().toISOString(),
   }]);
-
-  if (insertErr) {
-    console.warn("[sentinel/trigger] failed to pre-create calls row", insertErr);
-    // Not fatal — webhook will create on call_ended.
+  if (error) {
+    console.warn("[sentinel/trigger] failed to pre-create calls row", error);
   }
-
-  return NextResponse.json({
-    ok: true,
-    call_id: call.call_id,
-    patient: { id: patient.id, name: patient.name, phone: patient.phone },
-  });
 }
