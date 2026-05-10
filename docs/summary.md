@@ -1,6 +1,6 @@
 # Klarity Companion — Summary
 
-A proof-of-concept AI care layer that extends a psychiatric / ADHD telehealth practice's reach into the time between visits. Built in May 2026 for the Klarity x Retell x Zeabur x InsForge hackathon.
+A proof-of-concept AI care layer that extends a psychiatric / ADHD telehealth practice's reach into the time between visits. Built in May 2026 at **Build Smth AI-Native @ Cal**, on the Klarity track, with Retell, Zeabur, and InsForge as backend sponsors.
 
 Live demo: <https://klarity.zeabur.app>
 Source: <https://github.com/yurishevtsov/klarity-companion>
@@ -145,4 +145,4 @@ In any real deployment, the practice (not the technology vendor) holds clinical 
 
 ## Built by
 
-Yuri Shevtsov (with generous assistance from Claude Code) — Klarity Hackathon, May 2026.
+Yuri Shevtsov (with generous assistance from Claude Code) — Build Smth AI-Native @ Cal, Klarity track, May 2026.

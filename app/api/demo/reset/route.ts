@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { insforgeServer } from "@/lib/insforge";
 
 export const runtime = "nodejs";
@@ -54,15 +55,18 @@ export async function POST() {
 
   // Jane — clean low-risk demo exchange (per PLAN.md runbook)
   if (ids.jane) {
+    const janeSessionId = randomUUID();
     const janeMsgs = [
       {
         patient_id: ids.jane,
+        session_id: janeSessionId,
         role: "user",
         content: "I literally cannot start these emails. Been staring at my screen for 40 min.",
         created_at: isoMinutesAgo(12),
       },
       {
         patient_id: ids.jane,
+        session_id: janeSessionId,
         role: "assistant",
         content:
           "Lower the bar to laughable. Three rules:\n\n- Pick the **shortest** email — easiest sender wins.\n- Type the messiest reply you can. Typos welcome.\n- *90 seconds max.* Hit send.\n\nOnce one is gone the rest unstick themselves. Want me to set a 5-min timer when you start?",
@@ -81,10 +85,12 @@ export async function POST() {
 
   // Marcus — high-risk flagged exchange for the safety demo contrast
   if (ids.marcus) {
+    const marcusSessionId = randomUUID();
     const flags = ["suicidal_ideation", "medication_misuse", "risk:high"];
     const marcusMsgs = [
       {
         patient_id: ids.marcus,
+        session_id: marcusSessionId,
         role: "user",
         content:
           "Honestly I haven't been doing well. I've been thinking about hurting myself and I've been hoarding pills.",
@@ -93,6 +99,7 @@ export async function POST() {
       },
       {
         patient_id: ids.marcus,
+        session_id: marcusSessionId,
         role: "assistant",
         content:
           "I'm flagging this for your provider Dr. Reyes right now. This is urgent — please call or text 988 if you're in crisis. I'm here with you, and Dr. Reyes will reach out today.",
