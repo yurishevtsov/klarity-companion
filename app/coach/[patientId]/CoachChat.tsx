@@ -237,6 +237,38 @@ export default function CoachChat({
         </aside>
 
         <div className="flex flex-1 flex-col">
+          {/* Mobile-only session selector — sidebar isn't visible below md */}
+          <div className="mb-3 flex items-center gap-2 md:hidden">
+            <select
+              value={currentSessionId}
+              onChange={(e) => switchSession(e.target.value)}
+              className="min-w-0 flex-1 truncate rounded-xl border bg-card px-3 py-2 text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              aria-label="Switch chat session"
+            >
+              {sessions.length === 0 && (
+                <option value={currentSessionId}>(new chat)</option>
+              )}
+              {sessions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.all_private ? "🔒 " : ""}
+                  {(s.preview || "(empty)").slice(0, 50)}
+                  {(s.preview || "").length > 50 ? "…" : ""}
+                  {" · "}
+                  {formatRelative(s.last_at)}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={startNewSession}
+              title="Start a new chat"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-card text-base font-semibold shadow-sm transition-colors hover:bg-accent"
+              aria-label="New chat"
+            >
+              +
+            </button>
+          </div>
+
           {/* Privacy disclosure banner */}
           <div
             className={cn(
@@ -368,15 +400,18 @@ export default function CoachChat({
             </button>
           </form>
 
-          <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>Not a substitute for medical advice. In crisis, call or text 988.</span>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[11px] text-muted-foreground">
+            <span className="leading-snug">
+              Not a substitute for medical advice. In crisis, call or text 988.
+            </span>
             <button
               type="button"
               onClick={clearChat}
               disabled={clearing || status === "streaming" || messages.length === 0}
-              className="text-muted-foreground hover:text-foreground disabled:opacity-40"
+              title="Delete every message in this session"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border bg-card px-3 py-1.5 text-xs font-medium shadow-sm transition-colors hover:bg-accent disabled:opacity-50"
             >
-              {clearing ? "clearing…" : "clear chat"}
+              {clearing ? "Clearing…" : "🗑 Clear chat"}
             </button>
           </div>
         </div>

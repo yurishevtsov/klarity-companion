@@ -12,9 +12,32 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://klarity.zeabur.app";
+const SITE_TITLE = "Klarity Companion";
+const SITE_DESCRIPTION =
+  "Proof-of-concept AI care layer for the time between psychiatric visits. Coach, voice check-ins, and a unified clinician dashboard. Built for Build Smth AI-Native @ Cal.";
+
 export const metadata: Metadata = {
-  title: "Klarity Companion",
-  description: "AI care layer between visits — coach, sentinel, clinician dashboard.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: "%s — Klarity Companion",
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_TITLE,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  // No real production deployment — discourage indexing of demo data.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
