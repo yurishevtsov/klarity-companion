@@ -41,8 +41,8 @@ function CallCard({ call }: { call: CallWithNote }) {
   }[call.status];
 
   return (
-    <li className="group rounded-xl border p-3 text-xs">
-      <div className="flex items-baseline justify-between gap-2">
+    <li className="group min-w-0 overflow-hidden rounded-xl border p-3 text-xs">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase", statusStyle)}>
           {call.status.replace("_", " ")}
         </span>
@@ -92,7 +92,7 @@ function SoapField({ label, text }: { label: string; text: string }) {
       <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded bg-muted text-[9px] font-bold tabular-nums">
         {label}
       </span>
-      <Prose className="flex-1">{text}</Prose>
+      <Prose className="min-w-0 flex-1">{text}</Prose>
     </div>
   );
 }
@@ -137,7 +137,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
   const flaggedFlags = summary.recentRiskFlags;
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-10">
+    <main className="mx-auto w-full max-w-6xl flex-1 overflow-x-hidden px-4 py-6 sm:px-6 sm:py-10">
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <Link href="/" className="inline-flex items-center transition-colors hover:text-foreground">
           <KlarityMark showWordmark={false} />
@@ -188,8 +188,8 @@ export default async function PatientPage({ params }: PatientPageProps) {
 
       <section className="mt-6 grid gap-4 lg:grid-cols-3">
         {/* Coach chat */}
-        <div className="bg-card text-card-foreground rounded-2xl border p-5 shadow-sm lg:col-span-2">
-          <header className="flex items-baseline justify-between">
+        <div className="bg-card text-card-foreground min-w-0 overflow-hidden rounded-2xl border p-5 shadow-sm lg:col-span-2">
+          <header className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-sm font-medium">Coach sessions</h2>
             <span className="text-[11px] text-muted-foreground">
               {sessions.length} session{sessions.length === 1 ? "" : "s"} · {summary.totalMessages} msg/wk
@@ -205,7 +205,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
 
         {/* Right column — at-a-glance + Sentinel placeholder */}
         <div className="space-y-4">
-          <div className="bg-card text-card-foreground rounded-2xl border p-5 shadow-sm">
+          <div className="bg-card text-card-foreground min-w-0 overflow-hidden rounded-2xl border p-5 shadow-sm">
             <h2 className="text-sm font-medium">At a glance</h2>
             <dl className="mt-3 grid grid-cols-2 gap-y-2 text-xs">
               <dt className="text-muted-foreground">Last touch</dt>
@@ -227,7 +227,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
             </div>
           </div>
 
-          <div className="bg-card text-card-foreground rounded-2xl border p-5 shadow-sm">
+          <div className="bg-card text-card-foreground min-w-0 overflow-hidden rounded-2xl border p-5 shadow-sm">
             <header className="flex items-baseline justify-between mb-3">
               <h2 className="text-sm font-medium">Sentinel calls</h2>
               <span className="text-[11px] text-muted-foreground">{calls.length}</span>
