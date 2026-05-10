@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type FormEvent } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -13,15 +14,42 @@ type Props = {
 
 export default function CoachChat({ patientId, patientName, initialMessages }: Props) {
   const [input, setInput] = useState("");
+  const [clearing, setClearing] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/coach",
       body: { patientId },
     }),
     messages: initialMessages,
   });
+
+  async function clearChat() {
+    if (clearing || status === "streaming") return;
+    if (messages.length === 0) return;
+    if (!window.confirm("Clear this conversation? This deletes the patient's coach history.")) {
+      return;
+    }
+    setClearing(true);
+    try {
+      const res = await fetch("/api/coach/clear", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patientId }),
+      });
+      if (res.ok) {
+        setMessages([]);
+        router.refresh();
+      } else {
+        const json = await res.json().catch(() => ({}));
+        window.alert(`Failed to clear: ${json.error ?? res.status}`);
+      }
+    } finally {
+      setClearing(false);
+    }
+  }
 
   useEffect(() => {
     const el = scrollerRef.current;
@@ -108,9 +136,17 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
         </button>
       </form>
 
-      <p className="mt-3 text-center text-[11px] text-muted-foreground">
-        Not a substitute for medical advice. In crisis, call or text 988.
-      </p>
+      <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+        <span>Not a substitute for medical advice. In crisis, call or text 988.</span>
+        <button
+          type="button"
+          onClick={clearChat}
+          disabled={clearing || status === "streaming" || messages.length === 0}
+          className="text-muted-foreground hover:text-foreground disabled:opacity-40"
+        >
+          {clearing ? "clearing…" : "clear chat"}
+        </button>
+      </div>
     </div>
   );
 }
