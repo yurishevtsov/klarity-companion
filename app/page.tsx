@@ -43,7 +43,7 @@ export default function Home() {
             Inbound text coach + outbound voice check-ins.
           </p>
           <Link
-            href="/coach/sarah"
+            href="/coach/jane"
             className={buttonVariants({ size: "lg", className: "mt-5 w-full" })}
           >
             Open Coach (demo)

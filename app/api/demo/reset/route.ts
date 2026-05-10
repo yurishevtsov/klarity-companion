@@ -3,7 +3,7 @@ import { insforgeServer } from "@/lib/insforge";
 
 export const runtime = "nodejs";
 
-const DEMO_PATIENTS = ["sarah", "marcus", "jordan"] as const;
+const DEMO_PATIENTS = ["jane", "marcus", "jordan"] as const;
 
 function isoMinutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * 60_000).toISOString();
@@ -52,31 +52,31 @@ export async function POST() {
 
   const summary: Record<string, number> = {};
 
-  // Sarah — clean low-risk demo exchange (per PLAN.md runbook)
-  if (ids.sarah) {
-    const sarahMsgs = [
+  // Jane — clean low-risk demo exchange (per PLAN.md runbook)
+  if (ids.jane) {
+    const janeMsgs = [
       {
-        patient_id: ids.sarah,
+        patient_id: ids.jane,
         role: "user",
         content: "I literally cannot start these emails. Been staring at my screen for 40 min.",
         created_at: isoMinutesAgo(12),
       },
       {
-        patient_id: ids.sarah,
+        patient_id: ids.jane,
         role: "assistant",
         content:
           "Lower the bar to laughable. Pick the shortest email and type the messiest reply you can — typos, fragments, no rules. 90 seconds max. Hit send. Once one is gone the rest unstick themselves. Want me to set a 5-min timer when you start?",
         created_at: isoMinutesAgo(11),
       },
     ];
-    const { error } = await insforgeServer.database.from("chat_messages").insert(sarahMsgs);
+    const { error } = await insforgeServer.database.from("chat_messages").insert(janeMsgs);
     if (error) {
       return NextResponse.json(
-        { ok: false, error: `seed sarah failed: ${error.message}` },
+        { ok: false, error: `seed jane failed: ${error.message}` },
         { status: 500 }
       );
     }
-    summary.sarah_messages = sarahMsgs.length;
+    summary.jane_messages = janeMsgs.length;
   }
 
   // Marcus — high-risk flagged exchange for the safety demo contrast
@@ -95,7 +95,7 @@ export async function POST() {
         patient_id: ids.marcus,
         role: "assistant",
         content:
-          "I'm flagging this for your provider Dr. Chen right now. This is urgent — please call or text 988 if you're in crisis. I'm here with you, and Dr. Chen will reach out today.",
+          "I'm flagging this for your provider Dr. Reyes right now. This is urgent — please call or text 988 if you're in crisis. I'm here with you, and Dr. Reyes will reach out today.",
         flags,
         created_at: isoMinutesAgo(33),
       },
@@ -119,7 +119,7 @@ export async function POST() {
     ok: true,
     patients: Object.keys(ids),
     summary,
-    note: "Demo data restored: Sarah clean coach exchange, Marcus high-risk flagged, Jordan quiet.",
+    note: "Demo data restored: Jane clean coach exchange, Marcus high-risk flagged, Jordan quiet.",
   });
 }
 
