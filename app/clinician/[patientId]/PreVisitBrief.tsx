@@ -36,8 +36,8 @@ export default function PreVisitBrief({ patientId }: Props) {
 
   if (state.kind === "ready") {
     return (
-      <div className="rounded-2xl border bg-card p-5 shadow-sm">
-        <header className="flex items-center justify-between mb-3">
+      <div className="min-w-0 overflow-hidden rounded-2xl border bg-card p-5 shadow-sm">
+        <header className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
             <span className="inline-flex h-5 items-center rounded-full bg-primary px-2 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
               Pre-visit brief

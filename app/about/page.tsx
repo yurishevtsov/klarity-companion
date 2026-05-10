@@ -108,6 +108,14 @@ export default function AboutPage() {
       </header>
 
       <Section eyebrow="What we built" title="Three surfaces, one record">
+        <p className="-mt-1 mb-3 text-sm text-muted-foreground">
+          The AI coach and the human provider share the same chat thread. When the
+          patient messages the coach, the provider can reply directly into the
+          same conversation — adding clinical context the AI can&apos;t (treatment
+          plan reference, schedule changes, escalation). The patient sees the
+          reply marked as <strong>Dr. Reyes · provider</strong> alongside the
+          AI&apos;s turns, so the human-in-the-loop never has to leave the chat.
+        </p>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-2">
           <Surface
             dotColor="var(--brand-blue)"

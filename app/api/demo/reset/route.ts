@@ -53,7 +53,9 @@ export async function POST() {
 
   const summary: Record<string, number> = {};
 
-  // Jane — clean low-risk demo exchange (per PLAN.md runbook)
+  // Jane — clean low-risk demo exchange (per PLAN.md runbook).
+  // Includes a provider reply so the demo also shows the human-in-the-loop
+  // turn alongside the AI coach reply.
   if (ids.jane) {
     const janeSessionId = randomUUID();
     const janeMsgs = [
@@ -62,7 +64,7 @@ export async function POST() {
         session_id: janeSessionId,
         role: "user",
         content: "I literally cannot start these emails. Been staring at my screen for 40 min.",
-        created_at: isoMinutesAgo(12),
+        created_at: isoMinutesAgo(20),
       },
       {
         patient_id: ids.jane,
@@ -70,7 +72,15 @@ export async function POST() {
         role: "assistant",
         content:
           "Lower the bar to laughable. Three rules:\n\n- Pick the **shortest** email — easiest sender wins.\n- Type the messiest reply you can. Typos welcome.\n- *90 seconds max.* Hit send.\n\nOnce one is gone the rest unstick themselves. Want me to set a 5-min timer when you start?",
-        created_at: isoMinutesAgo(11),
+        created_at: isoMinutesAgo(19),
+      },
+      {
+        patient_id: ids.jane,
+        session_id: janeSessionId,
+        role: "provider",
+        content:
+          "Hi Jane — Dr. Reyes. I reviewed your coach session. The 'lower the bar' approach is a recognized behavioral activation strategy and consistent with our treatment plan. Try it for the next few days. If you notice the avoidance pattern spreading to other tasks, message back so we can adjust before your next visit.",
+        created_at: isoMinutesAgo(8),
       },
     ];
     const { error } = await insforgeServer.database.from("chat_messages").insert(janeMsgs);
@@ -126,7 +136,7 @@ export async function POST() {
     ok: true,
     patients: Object.keys(ids),
     summary,
-    note: "Demo data restored: Jane clean coach exchange, Marcus high-risk flagged, Jordan quiet.",
+    note: "Demo data restored: Jane clean coach exchange + provider reply, Marcus high-risk flagged, Jordan quiet.",
   });
 }
 

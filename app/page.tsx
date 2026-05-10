@@ -33,11 +33,7 @@ export default function Home() {
         </div>
         <Link
           href="/about"
-          className={buttonVariants({
-            variant: "outline",
-            size: "sm",
-            className: "shrink-0",
-          })}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:border-primary/50 hover:bg-primary/10"
         >
           About this project →
         </Link>
