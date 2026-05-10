@@ -5,7 +5,7 @@ import DemoResetButton from "./DemoResetButton";
 
 export default function Home() {
   return (
-    <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-16">
+    <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-10 sm:px-6 sm:py-16">
       {/* Subtle brand glow behind hero */}
       <div
         aria-hidden
@@ -16,21 +16,34 @@ export default function Home() {
         }}
       />
 
-      <div className="flex items-baseline gap-2">
-        <Image
-          src="/klarity-brand.svg"
-          alt="Klarity"
-          width={104}
-          height={34}
-          priority
-          unoptimized
-        />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground translate-y-[-2px]">
-          Companion
-        </span>
+      {/* Top bar: brand + About link as a prominent button to the right */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-baseline gap-2">
+          <Image
+            src="/klarity-brand.svg"
+            alt="Klarity"
+            width={104}
+            height={34}
+            priority
+            unoptimized
+          />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground translate-y-[-2px]">
+            Companion
+          </span>
+        </div>
+        <Link
+          href="/about"
+          className={buttonVariants({
+            variant: "outline",
+            size: "sm",
+            className: "shrink-0",
+          })}
+        >
+          About this project →
+        </Link>
       </div>
 
-      <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance leading-[1.05]">
+      <h1 className="mt-6 text-4xl sm:text-5xl font-semibold tracking-tight text-balance leading-[1.05]">
         Continuous care, <span style={{ color: "var(--brand-blue)" }}>between visits.</span>
       </h1>
       <p className="mt-5 max-w-xl text-base text-muted-foreground">
@@ -85,14 +98,13 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mt-12 flex flex-wrap items-center justify-between gap-4">
+      <div className="mt-12 space-y-3">
         <p className="text-xs text-muted-foreground">
-          Proof-of-concept demo. Not a substitute for medical advice. In crisis, call or text 988.{" "}
-          <Link href="/about" className="underline underline-offset-2 transition-colors hover:text-foreground">
-            About this project →
-          </Link>
+          Proof-of-concept demo. Not a substitute for medical advice. In crisis, call or text 988.
         </p>
-        <DemoResetButton />
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <DemoResetButton />
+        </div>
       </div>
     </main>
   );

@@ -56,7 +56,7 @@ The 50-minute appointment is when treatment decisions get made. Everything betwe
 
 ## How it would help Klarity
 
-This is mapped against Klarity's *State of Independent Practice* report findings:
+This is mapped against findings from Klarity's [State of Independent Practice 2025–2026](https://www.beautiful.ai/player/-OlgI-UVQDay6_YIX1c1) report (referenced in the [Klarity Provider Newsletter, Feb 2026](https://klarityhealth.substack.com/p/klarity-provider-newsletter-february)):
 
 | Pain point | Klarity Companion's contribution |
 |---|---|

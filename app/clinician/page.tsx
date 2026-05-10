@@ -41,7 +41,7 @@ export default async function ClinicianPage() {
   });
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
       <Link href="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
         <KlarityMark showWordmark={false} />
         <span>Klarity Companion</span>
@@ -64,16 +64,16 @@ export default async function ClinicianPage() {
               href={`/clinician/${patient.slug ?? patient.id}`}
               className="bg-card text-card-foreground flex items-center justify-between rounded-2xl border p-5 shadow-sm transition-all hover:shadow-md hover:bg-accent"
             >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium">{patient.name}</p>
                   <RiskBadge level={summary.level} />
                 </div>
-                <p className="mt-0.5 text-sm text-muted-foreground">
+                <p className="mt-0.5 text-sm text-muted-foreground [overflow-wrap:anywhere]">
                   {patient.conditions.join(" · ") || "no conditions"} · {summarizeMeds(patient.current_meds)}
                 </p>
                 {summary.recentRiskFlags.length > 0 && (
-                  <p className="mt-1 text-[11px] text-red-600 dark:text-red-400">
+                  <p className="mt-1 text-[11px] text-red-600 dark:text-red-400 [overflow-wrap:anywhere]">
                     flags: {summary.recentRiskFlags.join(", ").replace(/_/g, " ")}
                   </p>
                 )}

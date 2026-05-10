@@ -69,7 +69,7 @@ function Surface({
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
       <Link
         href="/"
         className="inline-flex items-center gap-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
@@ -91,22 +91,24 @@ export default function AboutPage() {
             Companion
           </span>
         </div>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-balance">
+        <h1 className="mt-4 text-2xl sm:text-3xl font-semibold tracking-tight text-balance">
           A proof-of-concept AI care layer for the time{" "}
           <span style={{ color: "var(--brand-blue)" }}>between visits</span>.
         </h1>
         <p className="mt-3 text-base text-muted-foreground">
-          Built in May 2026 at <strong>Build Smth AI-Native @ Cal</strong> on the Klarity track, with Retell, Zeabur, and InsForge as backend sponsors.
-          The 50-minute appointment is when treatment decisions get made. Everything
-          between visits is when patients quietly disengage, side effects go
-          unreported, and providers fly blind. This is three coordinated surfaces
-          designed to fill that gap, share data with each other, and surface what
-          matters to the clinician.
+          Built for <strong>Build Smth AI-Native @ Cal</strong> (Klarity track, May 2026).
+        </p>
+        <p className="mt-3 text-base text-muted-foreground">
+          The follow-up appointment is when treatment decisions get made.
+          Everything between visits is when patients quietly disengage, side
+          effects go unreported, and providers fly blind. This is three
+          coordinated surfaces designed to fill that gap, share data with each
+          other, and surface what matters to the clinician.
         </p>
       </header>
 
       <Section eyebrow="What we built" title="Three surfaces, one record">
-        <div className="grid gap-4 md:grid-cols-3 mt-2">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 mt-2">
           <Surface
             dotColor="var(--brand-blue)"
             label="Patient · Text"
@@ -135,7 +137,27 @@ export default function AboutPage() {
       </Section>
 
       <Section eyebrow="Strategic fit" title="How it would help Klarity">
-        <p>Mapped to findings from Klarity&apos;s State of Independent Practice report:</p>
+        <p>
+          Mapped to findings from Klarity&apos;s{" "}
+          <a
+            href="https://www.beautiful.ai/player/-OlgI-UVQDay6_YIX1c1"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            State of Independent Practice 2025–2026
+          </a>{" "}
+          report (originally referenced in the{" "}
+          <a
+            href="https://klarityhealth.substack.com/p/klarity-provider-newsletter-february"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            Klarity Provider Newsletter (February 2026)
+          </a>
+          ):
+        </p>
         <ul className="ml-5 list-disc space-y-1.5 text-[15px]">
           <li>
             <strong>41%</strong> of practices lose 11+ hours/week to admin → auto SOAP saves 5–10 min per check-in; pre-visit brief replaces ~20 min of chart-digging with 5 seconds of reading
