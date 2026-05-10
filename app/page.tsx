@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import DemoResetButton from "./DemoResetButton";
 
 export default function Home() {
   return (
@@ -43,9 +44,12 @@ export default function Home() {
         </div>
       </div>
 
-      <p className="mt-12 text-xs text-muted-foreground">
-        Demo data only. Not a substitute for medical advice. If in crisis, call or text 988.
-      </p>
+      <div className="mt-12 flex items-center justify-between gap-4">
+        <p className="text-xs text-muted-foreground">
+          Demo data only. Not a substitute for medical advice. If in crisis, call or text 988.
+        </p>
+        <DemoResetButton />
+      </div>
     </main>
   );
 }
