@@ -8,8 +8,13 @@
     "start": "next start"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.63",
+    "@ai-sdk/openai-compatible": "^2.0.47",
+    "@ai-sdk/react": "^3.0.179",
     "@anthropic-ai/sdk": "^0.95.1",
     "@base-ui/react": "^1.4.1",
+    "@insforge/sdk": "^1.2.7",
+    "ai": "^6.0.177",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.14.0",
