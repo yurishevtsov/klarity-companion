@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPatient, type Patient } from "@/lib/patients";
 import { loadHistory, getPatientRiskSummary, isFlagged } from "@/lib/chat";
+import { loadCallsWithNotes, type CallWithNote } from "@/lib/sentinel";
 import { RiskBadge } from "@/components/risk-badge";
 import { cn } from "@/lib/utils";
+import SentinelTrigger from "./SentinelTrigger";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +25,68 @@ function formatRelative(iso: string): string {
   const diffH = Math.floor(diffMin / 60);
   if (diffH < 24) return `${diffH}h ago`;
   return `${Math.floor(diffH / 24)}d ago`;
+}
+
+function CallCard({ call }: { call: CallWithNote }) {
+  const statusStyle = {
+    scheduled: "bg-muted text-muted-foreground",
+    in_progress: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+    completed: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    failed: "bg-red-500/15 text-red-700 dark:text-red-400",
+  }[call.status];
+
+  return (
+    <li className="rounded-xl border p-3 text-xs">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase", statusStyle)}>
+          {call.status.replace("_", " ")}
+        </span>
+        <span className="text-[10px] text-muted-foreground">
+          {formatRelative(call.created_at)}
+        </span>
+      </div>
+
+      {call.duration_sec !== null && (
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          {Math.floor(call.duration_sec / 60)}:{String(call.duration_sec % 60).padStart(2, "0")} duration
+        </p>
+      )}
+
+      {call.note ? (
+        <div className="mt-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">SOAP</span>
+            <RiskBadge level={call.note.risk_level} />
+          </div>
+          <SoapField label="S" text={call.note.soap_note.subjective} />
+          <SoapField label="O" text={call.note.soap_note.objective} />
+          <SoapField label="A" text={call.note.soap_note.assessment} />
+          <SoapField label="P" text={call.note.soap_note.plan} />
+          {call.note.flags.length > 0 && (
+            <p className="text-[10px] uppercase tracking-wide text-amber-700 dark:text-amber-400">
+              flags: {call.note.flags.join(", ").replace(/_/g, " ")}
+            </p>
+          )}
+        </div>
+      ) : call.status === "completed" ? (
+        <p className="mt-2 text-[11px] text-muted-foreground italic">
+          SOAP note generating…
+        </p>
+      ) : null}
+    </li>
+  );
+}
+
+function SoapField({ label, text }: { label: string; text: string }) {
+  if (!text) return null;
+  return (
+    <div className="text-[11px] leading-relaxed">
+      <span className="mr-1.5 inline-flex h-4 w-4 items-center justify-center rounded bg-muted text-[9px] font-bold tabular-nums">
+        {label}
+      </span>
+      <span>{text}</span>
+    </div>
+  );
 }
 
 function MedSummary({ patient }: { patient: Patient }) {
@@ -54,9 +118,10 @@ export default async function PatientPage({ params }: PatientPageProps) {
   const patient = await getPatient(patientId);
   if (!patient) notFound();
 
-  const [history, summary] = await Promise.all([
+  const [history, summary, calls] = await Promise.all([
     loadHistory(patient.id, 30),
     getPatientRiskSummary(patient.id),
+    loadCallsWithNotes(patient.id, 5),
   ]);
 
   const recent = [...history].reverse();
@@ -176,10 +241,25 @@ export default async function PatientPage({ params }: PatientPageProps) {
           </div>
 
           <div className="bg-card text-card-foreground rounded-2xl border p-5">
-            <h2 className="text-sm font-medium">Sentinel calls</h2>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Auto-generated SOAP notes ship in Phase 2.
-            </p>
+            <header className="flex items-baseline justify-between mb-3">
+              <h2 className="text-sm font-medium">Sentinel calls</h2>
+              <span className="text-[11px] text-muted-foreground">{calls.length}</span>
+            </header>
+            <SentinelTrigger
+              patientId={patient.id}
+              patientHasPhone={Boolean(patient.phone)}
+            />
+            {calls.length === 0 ? (
+              <p className="mt-3 text-[11px] text-muted-foreground">
+                No check-in calls yet.
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-3">
+                {calls.map((c) => (
+                  <CallCard key={c.id} call={c} />
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </section>
