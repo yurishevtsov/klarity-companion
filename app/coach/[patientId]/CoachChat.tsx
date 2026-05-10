@@ -1,11 +1,41 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo, type FormEvent } from "react";
+import { useState, useRef, useEffect, useMemo, type FormEvent, type ReactNode } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import FocusOverlay, { type FocusState } from "./FocusOverlay";
+
+const ASSISTANT_MD_COMPONENTS = {
+  p: ({ children }: { children?: ReactNode }) => (
+    <p className="mb-2 last:mb-0">{children}</p>
+  ),
+  ul: ({ children }: { children?: ReactNode }) => (
+    <ul className="my-1 list-disc space-y-0.5 pl-5">{children}</ul>
+  ),
+  ol: ({ children }: { children?: ReactNode }) => (
+    <ol className="my-1 list-decimal space-y-0.5 pl-5">{children}</ol>
+  ),
+  li: ({ children }: { children?: ReactNode }) => (
+    <li className="leading-relaxed">{children}</li>
+  ),
+  strong: ({ children }: { children?: ReactNode }) => (
+    <strong className="font-semibold">{children}</strong>
+  ),
+  em: ({ children }: { children?: ReactNode }) => <em className="italic">{children}</em>,
+  code: ({ children }: { children?: ReactNode }) => (
+    <code className="rounded bg-foreground/10 px-1 py-0.5 font-mono text-[0.85em]">
+      {children}
+    </code>
+  ),
+  a: ({ children, href }: { children?: ReactNode; href?: string }) => (
+    <a href={href} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+      {children}
+    </a>
+  ),
+};
 
 type Props = {
   patientId: string;
@@ -136,16 +166,20 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
             <div key={m.id} className={cn("flex", isUser ? "justify-end" : "justify-start")}>
               <div
                 className={cn(
-                  "max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm leading-relaxed",
+                  "max-w-[80%] overflow-hidden rounded-2xl px-4 py-2 text-sm leading-relaxed [overflow-wrap:anywhere] [word-break:break-word]",
                   isUser
-                    ? "bg-primary text-primary-foreground"
+                    ? "whitespace-pre-wrap bg-primary text-primary-foreground"
                     : "bg-muted text-foreground"
                 )}
               >
-                {text || (
+                {!text ? (
                   <span className="opacity-50">
                     {status === "streaming" || status === "submitted" ? "…" : ""}
                   </span>
+                ) : isUser ? (
+                  text
+                ) : (
+                  <ReactMarkdown components={ASSISTANT_MD_COMPONENTS}>{text}</ReactMarkdown>
                 )}
               </div>
             </div>

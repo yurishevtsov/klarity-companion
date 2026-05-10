@@ -50,7 +50,7 @@ export default async function ClinicianPage() {
       <header className="mt-4 flex items-baseline justify-between">
         <div>
           <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
-            Dr. Chen — Today
+            Dr. Maya Reyes — Today
           </p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">Patients</h1>
         </div>

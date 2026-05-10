@@ -42,7 +42,7 @@ export default function DemoResetButton() {
       </button>
       {status.kind === "ok" && (
         <span className="ml-2 text-emerald-700 dark:text-emerald-400">
-          ✓ Restored ({status.summary.sarah_messages ?? 0} sarah · {status.summary.marcus_messages ?? 0} marcus)
+          ✓ Restored ({status.summary.jane_messages ?? 0} jane · {status.summary.marcus_messages ?? 0} marcus)
         </span>
       )}
       {status.kind === "err" && (

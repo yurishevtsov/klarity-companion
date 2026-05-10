@@ -1,12 +1,12 @@
 -- Klarity Companion — demo seed data
 -- 3 fixed patients for demo. Slug + name stable across reseeds.
--- Demo phone goes on Sarah only — she's the live-call demo subject.
+-- Demo phone goes on Jane only — she's the live-call demo subject.
 
 insert into patients (slug, name, dob, conditions, current_meds, phone)
 values
   (
-    'sarah',
-    'Sarah Chen',
+    'jane',
+    'Jane Doe',
     '1998-05-09',
     array['ADHD'],
     '[{"name":"Adderall XR","dose":"20mg","started_at":"2026-04-25"}]'::jsonb,

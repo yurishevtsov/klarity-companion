@@ -102,7 +102,7 @@ clinician_notes (
 ```
 
 Seed 3 fake patients before demo:
-- Sarah, 28, ADHD, started Adderall XR 20mg 14 days ago
+- Jane, 28, ADHD, started Adderall XR 20mg 14 days ago
 - Marcus, 34, ADHD + anxiety, on Vyvanse 30mg + Lexapro 10mg
 - Jordan, 22, depression, started Wellbutrin 150mg, day 7
 
@@ -166,7 +166,7 @@ Tone: warm, direct, no corporate fluff. You're a smart friend who gets ADHD.
 ## Things to NOT do (scope-cut warnings)
 
 - ❌ Real SMS — fake the chat in browser. Twilio + verification = time sink.
-- ❌ Real auth — clinician dashboard is "logged in as Dr. Chen" hardcoded.
+- ❌ Real auth — clinician dashboard is "logged in as Dr. Reyes" hardcoded.
 - ❌ Inbound voice (front desk) — was on the table, cut it. Outbound + chat is enough.
 - ❌ HIPAA implementation — *say* HIPAA in pitch, demo on fake data.
 - ❌ Multi-clinician permissions, billing, real EHR sync — none of it.
@@ -182,7 +182,7 @@ From Klarity's own State of Independent Private Practice report:
 - 36% use no AI tools
 - 90% expect patient volume to grow in 2026
 
-Your one-liner: **"Klarity already does the visit. We do the 23 hours and 50 minutes between visits."**
+Your one-liner: **"Klarity does the visit. We do everything between visits."**
 
 ---
 
@@ -202,7 +202,7 @@ Your one-liner: **"Klarity already does the visit. We do the 23 hours and 50 min
 
 When a provider opens a patient's upcoming appointment, Claude reads the last 2 weeks of coach chats + last Sentinel call transcript + current meds, and generates a 4-5 sentence pre-visit brief:
 
-> "Sarah is on day 14 of Adderall XR 20mg. Sentinel call on day 7 flagged mild appetite suppression but good focus gains. Coach chats this week show recurring 3pm energy crash and difficulty starting evening tasks — pattern suggests dose timing or afternoon booster discussion. PHQ-2 trending down (4→2). No risk flags. Suggest: discuss dose timing, ask about sleep onset."
+> "Jane is on day 14 of Adderall XR 20mg. Sentinel call on day 7 flagged mild appetite suppression but good focus gains. Coach chats this week show recurring 3pm energy crash and difficulty starting evening tasks — pattern suggests dose timing or afternoon booster discussion. PHQ-2 trending down (4→2). No risk flags. Suggest: discuss dose timing, ask about sleep onset."
 
 **Why this adds the most value:** It closes the loop. Coach + Sentinel collect data; this is the moment that data *changes a clinical decision*. Demo-wise it's the most impressive 30 seconds — judges literally see the ROI in a paragraph.
 
@@ -243,7 +243,7 @@ Generate ONE 8-15 second video clip the night before / morning of pitch. Drop it
 **Prompt to give Pixverse:**
 > "Young woman at home desk surrounded by sticky notes, laptop open with too many tabs, looking overwhelmed and unable to start work, soft natural lighting, cinematic, 8 seconds"
 
-**Why this works:** The first 30 seconds of any pitch is where you need emotional buy-in. A real-feeling clip of "Sarah" beats a stock photo or text-heavy slide. Zero live demo risk — it's just a video file.
+**Why this works:** The first 30 seconds of any pitch is where you need emotional buy-in. A real-feeling clip of "Jane" beats a stock photo or text-heavy slide. Zero live demo risk — it's just a video file.
 
 **Add a 2nd clip if time:** "Tired doctor at desk late at night, stack of patient charts, rubbing eyes" — for the provider-pain moment.
 
@@ -273,43 +273,43 @@ One line near the close: *"Patient narrative clip generated with Pixverse."* Don
 - [ ] Phone number entered into the "trigger Sentinel" button — verify with a test call NOW
 - [ ] Browser windows open in this order, ready to alt-tab:
   1. Slides (slide 1)
-  2. Clinician dashboard `/clinician/sarah-id`
-  3. Coach view `/coach/sarah-id` with one pre-typed message ready
+  2. Clinician dashboard `/clinician/jane-id`
+  3. Coach view `/coach/jane-id` with one pre-typed message ready
 - [ ] Backup video of Sentinel call queued in a 4th tab — DO NOT close
 - [ ] Database has fresh seed data — re-run seed script if you've been testing
-- [ ] Coach chat history for Sarah has the "can't focus on emails" exchange from earlier (seed it, don't generate live — too slow)
+- [ ] Coach chat history for Jane has the "can't focus on emails" exchange from earlier (seed it, don't generate live — too slow)
 - [ ] Volume up. Test the phone ringer is audible to judges.
 - [ ] Close Slack, email, anything that can notify mid-demo
 
 ### The script (with timing)
 
 **[0:00-0:30] Problem (slide)**
-> "Klarity's own report: 41% of independent practices lose 11 hours a week to admin. 41% say DEA telemedicine rules are their biggest regulatory risk. The visit is 50 minutes. The 23 hours and 50 minutes between visits is where patients drop off, side effects go unreported, and providers fly blind. That's where we live."
+> "Klarity's own report: 41% of independent practices lose 11 hours a week to admin. 41% say DEA telemedicine rules are their biggest regulatory risk. The 50-minute visit is when treatment decisions get made — but it's everything *between* visits where patients quietly disengage, side effects go unreported, and providers fly blind. That's where we live."
 
 **[0:30-0:45] Setup (switch to clinician dashboard)**
-> "Meet Sarah. She's 14 days into Adderall XR. Her provider Dr. Chen has 30 patients today and won't see her for another two weeks. Watch what happens between now and then."
+> "Meet Jane. She's 14 days into Adderall XR. Her provider Dr. Reyes has 30 patients today and won't see her for another two weeks. Watch what happens between now and then."
 
 **[0:45-1:30] Sentinel demo (live phone call)**
 - Click "Trigger Sentinel Check-in" button on dashboard
 - Your phone rings on stage — pick up on speaker, hold near laptop mic
-- AI: "Hi Sarah, this is Klarity care line checking in on your Adderall — got two minutes?"
+- AI: "Hi Jane, this is Klarity care line checking in on your Adderall — got two minutes?"
 - Answer ~3 questions naturally, mention one side effect ("a little appetite suppression")
 - Hang up
-- > "While we were talking, here's what happened on Dr. Chen's end."
+- > "While we were talking, here's what happened on Dr. Reyes's end."
 - Tab to dashboard — SOAP note has populated, risk flag visible
 - ⚠️ **If call fails:** "Live demos. Here's what it looks like" → switch to backup video tab. Don't apologize, just keep moving.
 
 **[1:30-2:15] Coach demo**
 - Tab to coach view
-- > "Sarah also messaged the coach this morning. Real ADHD patient text."
+- > "Jane also messaged the coach this morning. Real ADHD patient text."
 - Show pre-seeded message: "I literally cannot start these emails. Been staring 40 min."
 - Show coach's reply (already there from seed)
 - *Optional easter egg moment:* type `/focus` → screen dims → "this is what living with ADHD between visits actually looks like" → tab away before timer gets boring
 
 **[2:15-2:45] The payoff (back to dashboard)**
-- > "Now Dr. Chen opens Sarah's chart. Two weeks of context she didn't have time to read."
+- > "Now Dr. Reyes opens Jane's chart. Two weeks of context she didn't have time to read."
 - Click "Generate pre-visit brief" (stretch goal) — paragraph appears
-- > "Five seconds of reading replaces 20 minutes of chart-digging. Dr. Chen walks into the visit knowing exactly what to discuss: dose timing, that 3pm crash, the appetite suppression."
+- > "Five seconds of reading replaces 20 minutes of chart-digging. Dr. Reyes walks into the visit knowing exactly what to discuss: dose timing, that 3pm crash, the appetite suppression."
 
 **[2:45-3:00] Close**
 > "Klarity does the visit. We do everything around it. Voice agents from Retell, backend on InsForge, deployed on Zeabur, all four sponsors in one product. Klarity Companion."
