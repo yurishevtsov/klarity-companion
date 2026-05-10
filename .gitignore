@@ -55,3 +55,6 @@ next-env.d.ts
 .roo
 .trae
 .windsurf
+
+# scratch — local notes / handoffs / drafts (never commit)
+scratch/
