@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listPatients, type Patient } from "@/lib/patients";
 import { getPatientRiskSummary, type RiskSummary } from "@/lib/chat";
 import { RiskBadge } from "@/components/risk-badge";
+import { KlarityMark } from "@/components/klarity-mark";
 
 // Always render fresh — chat history changes between visits.
 export const dynamic = "force-dynamic";
@@ -41,8 +42,9 @@ export default async function ClinicianPage() {
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12">
-      <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">
-        ← Klarity Companion
+      <Link href="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+        <KlarityMark showWordmark={false} />
+        <span>Klarity Companion</span>
       </Link>
 
       <header className="mt-4 flex items-baseline justify-between">
@@ -60,7 +62,7 @@ export default async function ClinicianPage() {
           <li key={patient.id}>
             <Link
               href={`/clinician/${patient.slug ?? patient.id}`}
-              className="bg-card text-card-foreground flex items-center justify-between rounded-2xl border p-5 transition-colors hover:bg-accent"
+              className="bg-card text-card-foreground flex items-center justify-between rounded-2xl border p-5 shadow-sm transition-all hover:shadow-md hover:bg-accent"
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
