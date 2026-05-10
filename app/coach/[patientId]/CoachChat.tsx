@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect, type FormEvent } from "react";
+import { useState, useRef, useEffect, useMemo, type FormEvent } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import FocusOverlay, { type FocusState } from "./FocusOverlay";
 
 type Props = {
   patientId: string;
@@ -12,17 +13,41 @@ type Props = {
   initialMessages: UIMessage[];
 };
 
+const FOCUS_TRIGGERS = ["/focus", "i need to lock in", "hyperfocus mode"];
+const SESSION_LENGTH_SEC = 25 * 60;
+
+function isFocusTrigger(text: string): boolean {
+  const lower = text.trim().toLowerCase();
+  return FOCUS_TRIGGERS.some((t) => lower === t || lower.includes(t));
+}
+
 export default function CoachChat({ patientId, patientName, initialMessages }: Props) {
   const [input, setInput] = useState("");
   const [clearing, setClearing] = useState(false);
+  const [focusState, setFocusState] = useState<FocusState | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Sync focus state into a ref so the transport body fn reads fresh values.
+  const focusRef = useRef<FocusState | null>(null);
+  focusRef.current = focusState;
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/coach",
+        body: () => {
+          const fs = focusRef.current;
+          const focusMode = fs?.phase === "running";
+          const focusTask = fs?.phase === "running" ? fs.task : null;
+          return { patientId, focus_mode: focusMode, focus_task: focusTask };
+        },
+      }),
+    [patientId]
+  );
+
   const { messages, sendMessage, status, error, setMessages } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/coach",
-      body: { patientId },
-    }),
+    transport,
     messages: initialMessages,
   });
 
@@ -60,11 +85,36 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
     e.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || status === "streaming" || status === "submitted") return;
+    if (isFocusTrigger(trimmed)) {
+      setFocusState({ phase: "picking" });
+      setInput("");
+      return;
+    }
     sendMessage({ text: trimmed });
     setInput("");
   }
 
   return (
+    <>
+    {focusState && (
+      <FocusOverlay
+        state={focusState}
+        onPick={(task) =>
+          setFocusState({
+            phase: "running",
+            task,
+            startedAt: Date.now(),
+            sessionLength: SESSION_LENGTH_SEC,
+          })
+        }
+        onComplete={() =>
+          setFocusState((s) =>
+            s?.phase === "running" ? { phase: "break", task: s.task } : s
+          )
+        }
+        onExit={() => setFocusState(null)}
+      />
+    )}
     <div className="flex flex-1 flex-col">
       <div
         ref={scrollerRef}
@@ -148,5 +198,6 @@ export default function CoachChat({ patientId, patientName, initialMessages }: P
         </button>
       </div>
     </div>
+    </>
   );
 }
