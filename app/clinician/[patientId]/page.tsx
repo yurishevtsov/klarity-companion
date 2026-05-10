@@ -137,7 +137,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
   const flaggedFlags = summary.recentRiskFlags;
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-10">
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <Link href="/" className="inline-flex items-center transition-colors hover:text-foreground">
           <KlarityMark showWordmark={false} />
@@ -149,12 +149,12 @@ export default async function PatientPage({ params }: PatientPageProps) {
       </div>
 
       <header className="mt-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
             Patient
           </p>
-          <div className="mt-1 flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{patient.name}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight [overflow-wrap:anywhere]">{patient.name}</h1>
             <RiskBadge level={summary.level} />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -163,7 +163,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
         </div>
         <Link
           href={`/coach/${patient.slug ?? patient.id}`}
-          className="text-xs font-medium text-primary hover:underline"
+          className="shrink-0 text-xs font-medium text-primary hover:underline"
         >
           Open coach view →
         </Link>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 type Status =
   | { kind: "idle" }
@@ -30,23 +31,30 @@ export default function DemoResetButton() {
     }
   }
 
+  const label =
+    status.kind === "running" ? "Restoring…" : "↻ Restore demo state";
+
   return (
-    <div className="text-[11px] text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-3">
       <button
         type="button"
         onClick={reset}
         disabled={status.kind === "running"}
-        className="underline-offset-2 hover:underline disabled:opacity-50"
+        className={cn(
+          "inline-flex items-center gap-2 rounded-xl border bg-card px-3 py-1.5 text-xs font-medium shadow-sm transition-colors",
+          "hover:bg-accent disabled:opacity-50"
+        )}
+        title="Wipes Jane / Marcus / Jordan back to canonical demo state"
       >
-        {status.kind === "running" ? "Restoring…" : "Restore demo state"}
+        {label}
       </button>
       {status.kind === "ok" && (
-        <span className="ml-2 text-emerald-700 dark:text-emerald-400">
+        <span className="text-[11px] text-emerald-700 dark:text-emerald-400">
           ✓ Restored ({status.summary.jane_messages ?? 0} jane · {status.summary.marcus_messages ?? 0} marcus)
         </span>
       )}
       {status.kind === "err" && (
-        <span className="ml-2 text-red-700 dark:text-red-400">{status.message}</span>
+        <span className="text-[11px] text-red-700 dark:text-red-400">{status.message}</span>
       )}
     </div>
   );
