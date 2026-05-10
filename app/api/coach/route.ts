@@ -11,6 +11,7 @@ type CoachRequestBody = {
   patientId: string;
   focus_mode?: boolean;
   focus_task?: string | null;
+  private?: boolean;
 };
 
 function extractText(message: UIMessage): string {
@@ -23,6 +24,7 @@ function extractText(message: UIMessage): string {
 export async function POST(req: Request) {
   const body = (await req.json()) as CoachRequestBody;
   const { messages, patientId, focus_mode, focus_task } = body;
+  const isPrivate = Boolean(body.private);
 
   if (!patientId || !Array.isArray(messages)) {
     return new Response("Bad request", { status: 400 });
@@ -42,7 +44,7 @@ export async function POST(req: Request) {
   if (userMessageText) {
     const { data, error } = await insforgeServer.database
       .from("chat_messages")
-      .insert([{ patient_id: patient.id, role: "user", content: userMessageText }])
+      .insert([{ patient_id: patient.id, role: "user", content: userMessageText, private: isPrivate }])
       .select("id")
       .single();
     if (error) console.error("[coach] failed to persist user message", error);
@@ -61,10 +63,10 @@ export async function POST(req: Request) {
     onFinish: async ({ text }) => {
       if (!text) return;
 
-      // Persist assistant message
+      // Persist assistant message — inherits the patient's privacy choice for this turn.
       const { data: assistantRow, error: insertErr } = await insforgeServer.database
         .from("chat_messages")
-        .insert([{ patient_id: patient.id, role: "assistant", content: text }])
+        .insert([{ patient_id: patient.id, role: "assistant", content: text, private: isPrivate }])
         .select("id")
         .single();
       if (insertErr) {

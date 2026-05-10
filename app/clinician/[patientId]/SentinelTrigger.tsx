@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { RetellWebClient } from "retell-client-js-sdk";
+import { cn } from "@/lib/utils";
 
 type Props = {
   patientId: string;
@@ -20,9 +21,11 @@ type State =
 
 export default function SentinelTrigger({ patientId }: Props) {
   const [state, setState] = useState<State>({ kind: "idle" });
+  const [micLevel, setMicLevel] = useState(0);
   const clientRef = useRef<RetellWebClient | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const micPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
 
   // Cleanup: hang up + stop polling on unmount
@@ -31,8 +34,29 @@ export default function SentinelTrigger({ patientId }: Props) {
       clientRef.current?.stopCall();
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
       if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
+      if (micPollRef.current) clearInterval(micPollRef.current);
     };
   }, []);
+
+  function startMicMeter(client: RetellWebClient) {
+    if (micPollRef.current) clearInterval(micPollRef.current);
+    micPollRef.current = setInterval(() => {
+      try {
+        const v = client.analyzerComponent?.calculateVolume?.() ?? 0;
+        setMicLevel(v);
+      } catch {
+        // analyzer not ready yet — ignore
+      }
+    }, 80);
+  }
+
+  function stopMicMeter() {
+    if (micPollRef.current) {
+      clearInterval(micPollRef.current);
+      micPollRef.current = null;
+    }
+    setMicLevel(0);
+  }
 
   // After a call ends, poll for ~30s waiting for the SOAP note to arrive.
   // SOAP gen takes ~6s server-side; polling every 3s lands the update in <10s
@@ -85,6 +109,17 @@ export default function SentinelTrigger({ patientId }: Props) {
 
       client.on("call_started", () => {
         setState({ kind: "web-live", callId: json.call_id, agentTalking: false });
+        startMicMeter(client);
+        // Log selected device for debugging mic capture issues
+        if (typeof navigator !== "undefined" && navigator.mediaDevices?.enumerateDevices) {
+          navigator.mediaDevices.enumerateDevices().then((devices) => {
+            const inputs = devices.filter((d) => d.kind === "audioinput");
+            console.info(
+              "[sentinel] available audio inputs:",
+              inputs.map((d) => `${d.label || "(unnamed)"} [${d.deviceId.slice(0, 8)}]`)
+            );
+          });
+        }
       });
       client.on("agent_start_talking", () => {
         setState((s) =>
@@ -99,6 +134,7 @@ export default function SentinelTrigger({ patientId }: Props) {
       client.on("call_ended", () => {
         setState({ kind: "ended", callId: json.call_id });
         clientRef.current = null;
+        stopMicMeter();
         startPostCallPolling();
       });
       client.on("error", (err: unknown) => {
@@ -117,6 +153,7 @@ export default function SentinelTrigger({ patientId }: Props) {
   function hangUp() {
     clientRef.current?.stopCall();
     clientRef.current = null;
+    stopMicMeter();
     setState((s) =>
       s.kind === "web-live" || s.kind === "web-connecting"
         ? { kind: "ended", callId: "callId" in s ? s.callId : "" }
@@ -127,6 +164,10 @@ export default function SentinelTrigger({ patientId }: Props) {
 
   // Render
   if (state.kind === "web-live" || state.kind === "web-connecting") {
+    // Mic level scaled into 8 bars. calculateVolume() typically returns 0..1
+    // (sometimes higher with loud peaks). Clamp + bin into bars.
+    const bars = 8;
+    const filled = Math.min(bars, Math.max(0, Math.round(micLevel * bars * 1.4)));
     return (
       <div className="space-y-2">
         <div className="rounded-xl bg-emerald-500/10 px-3 py-2 text-xs">
@@ -144,6 +185,30 @@ export default function SentinelTrigger({ patientId }: Props) {
               </span>
             )}
           </div>
+          {state.kind === "web-live" && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-[10px] text-emerald-700/70 dark:text-emerald-400/70">
+                mic
+              </span>
+              <div className="flex flex-1 items-end gap-[2px]">
+                {Array.from({ length: bars }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "block w-[3px] rounded-sm transition-all",
+                      i < filled
+                        ? "bg-emerald-500"
+                        : "bg-emerald-500/15"
+                    )}
+                    style={{ height: `${4 + i * 1.5}px` }}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] tabular-nums text-emerald-700/60 dark:text-emerald-400/60">
+                {filled === 0 ? "—" : `${Math.round(micLevel * 100)}`}
+              </span>
+            </div>
+          )}
         </div>
         <button
           type="button"
@@ -153,7 +218,7 @@ export default function SentinelTrigger({ patientId }: Props) {
           Hang up
         </button>
         <p className="text-[10px] text-muted-foreground">
-          Speak into your mic. SOAP note appears on the dashboard ~10s after the call ends.
+          Speak into your mic. If the bar above stays flat while you talk, your browser captured the wrong input device.
         </p>
       </div>
     );

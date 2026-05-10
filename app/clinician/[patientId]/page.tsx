@@ -126,12 +126,13 @@ export default async function PatientPage({ params }: PatientPageProps) {
   if (!patient) notFound();
 
   const [history, summary, calls] = await Promise.all([
-    loadHistory(patient.id, 30),
+    loadHistory(patient.id, 30, { excludePrivate: true }),
     getPatientRiskSummary(patient.id),
     loadCallsWithNotes(patient.id, 5),
   ]);
 
-  const recent = [...history].reverse();
+  // Show last 8 in chronological order (oldest → newest, newest at the bottom).
+  const recent = history.slice(-8);
   const lastTouchpoint = summary.lastTouchpoint ? formatRelative(summary.lastTouchpoint) : "no activity";
   const flaggedFlags = summary.recentRiskFlags;
 
@@ -201,7 +202,7 @@ export default async function PatientPage({ params }: PatientPageProps) {
             </p>
           ) : (
             <ul className="mt-4 space-y-2">
-              {recent.slice(0, 8).map((m) => {
+              {recent.map((m) => {
                 const flagged = isFlagged(m.flags);
                 const userFlags = (m.flags ?? []).filter((f) => !f.startsWith("risk:"));
                 return (
