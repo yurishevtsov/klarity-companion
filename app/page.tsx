@@ -19,11 +19,12 @@ export default function Home() {
       <KlarityMark />
 
       <h1 className="mt-5 text-5xl font-semibold tracking-tight text-balance leading-[1.05]">
-        The <span style={{ color: "var(--brand-blue)" }}>23 hours and 50 minutes</span> between visits.
+        Continuous care, <span style={{ color: "var(--brand-blue)" }}>between visits.</span>
       </h1>
       <p className="mt-5 max-w-xl text-base text-muted-foreground">
-        AI care layer for psych and ADHD telehealth practices. Coach for
-        patients, Sentinel voice check-ins, and a unified clinician dashboard.
+        AI care layer for psych and ADHD telehealth practices. A coach in the
+        patient&apos;s pocket, scheduled voice check-ins, and a unified clinician
+        dashboard — so the work between appointments stops being invisible.
       </p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
