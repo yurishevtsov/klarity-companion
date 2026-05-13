@@ -136,4 +136,31 @@
   html {
     @apply font-sans;
   }
+
+  /* Desktop typography scale.
+     Tailwind's text + spacing utilities are rem-based, so bumping the root
+     font-size proportionally scales the whole UI without touching any markup.
+     Phones and tablets (<1024px) keep the default 16px — the mobile-tuned
+     layout stays exactly as designed. Each step is ~6% larger than the last,
+     so the progression feels natural across laptop → desktop → high-density. */
+  @media (min-width: 1024px) {
+    html {
+      font-size: 17px;
+    }
+  }
+  @media (min-width: 1280px) {
+    html {
+      font-size: 18px;
+    }
+  }
+  @media (min-width: 1536px) {
+    html {
+      font-size: 19px;
+    }
+  }
+  @media (min-width: 1920px) {
+    html {
+      font-size: 20px;
+    }
+  }
 }
