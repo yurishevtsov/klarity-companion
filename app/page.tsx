@@ -5,7 +5,7 @@ import DemoResetButton from "./DemoResetButton";
 
 export default function Home() {
   return (
-    <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center overflow-x-hidden px-4 py-10 sm:px-6 sm:py-16">
+    <main className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-x-hidden px-4 py-10 sm:px-6 sm:py-16">
       {/* Subtle brand glow behind hero */}
       <div
         aria-hidden
