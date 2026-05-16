@@ -1,11 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Access log middleware. Fires a small fire-and-forget POST on every page
- * request so we can see when stakeholders open the demo. Skipped for API
- * routes, static assets, and the log endpoint itself (avoid recursion).
+ * Access log proxy (formerly middleware.ts in Next 15). Fires a small
+ * fire-and-forget POST on every page request so we can see when stakeholders
+ * open the demo. Skipped for API routes, static assets, and the log endpoint
+ * itself (avoid recursion).
+ *
+ * proxy.ts runs on the Node.js runtime by default in Next 16, which keeps
+ * the function alive long enough for the fire-and-forget fetch to complete.
+ * The same logic on Edge-runtime middleware.ts terminated the fetch when the
+ * response returned, so production hits silently dropped.
  */
-export function middleware(req: NextRequest) {
+export default function proxy(req: NextRequest) {
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
     req.headers.get("x-real-ip") ||
