@@ -1,15 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { insforgeServer } from "@/lib/insforge";
 
 /**
- * Access log proxy (formerly middleware.ts in Next 15). Fires a small
- * fire-and-forget POST on every page request so we can see when stakeholders
- * open the demo. Skipped for API routes, static assets, and the log endpoint
- * itself (avoid recursion).
+ * Access log proxy (formerly middleware.ts in Next 15). Records every page
+ * request so we can see when stakeholders open the demo. Skipped for API
+ * routes, static assets, and the log endpoint itself (avoid recursion).
  *
- * proxy.ts runs on the Node.js runtime by default in Next 16, which keeps
- * the function alive long enough for the fire-and-forget fetch to complete.
- * The same logic on Edge-runtime middleware.ts terminated the fetch when the
- * response returned, so production hits silently dropped.
+ * proxy.ts runs on the Node.js runtime by default in Next 16, which lets us
+ * write to InsForge directly in-process instead of bouncing a fetch through
+ * the public load balancer. The old middleware.ts version did
+ * `fetch("https://klarity.zeabur.app/api/log-access", ...)` which (a) was
+ * killed by the Edge runtime before completing in production and (b) would
+ * have had to make a public-DNS + TLS roundtrip back through Zeabur's LB even
+ * if it ran on Node — fragile and slow. The direct InsForge insert below has
+ * neither failure mode.
  */
 export default function proxy(req: NextRequest) {
   const ip =
@@ -21,18 +25,21 @@ export default function proxy(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") ?? "";
   const referrer = req.headers.get("referer") ?? "";
 
-  // Build absolute URL for the internal POST. Use the request's own origin so
-  // it works whether running on Zeabur or localhost.
-  const logUrl = new URL("/api/log-access", req.url);
-
   // Fire-and-forget. Failures here must NEVER affect the user-facing response.
-  void fetch(logUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, ip, user_agent: userAgent, referrer }),
-  }).catch(() => {
-    /* swallow — logging is best-effort */
-  });
+  // Node runtime keeps the promise alive in the event loop until it resolves.
+  // The InsForge SDK returns a PromiseLike, so all error handling lives inside
+  // the .then() — we can't chain .catch() here.
+  void Promise.resolve(
+    insforgeServer.database
+      .from("access_log")
+      .insert([{ path, ip, user_agent: userAgent, referrer }])
+  )
+    .then(({ error }) => {
+      if (error) console.error("[proxy] access_log insert failed", error);
+    })
+    .catch(() => {
+      /* swallow — logging is best-effort */
+    });
 
   return NextResponse.next();
 }
